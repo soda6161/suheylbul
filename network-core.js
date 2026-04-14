@@ -15,49 +15,36 @@ const NET = {
         this.db = firebase.database();
         this.myId = localStorage.getItem('tabu_uid') || Math.random().toString(36).substring(2, 10);
         localStorage.setItem('tabu_uid', this.myId);
-
         this.playerName = localStorage.getItem('tabu_player_name') || "Oyuncu";
-
-        const params = new URLSearchParams(window.location.search);
-        this.roomCode = params.get('room');
-
-        if (this.roomCode) {
-            this.joinRoom(this.roomCode);
-        }
     },
 
     createRoom() {
-        const name = document.getElementById('login-name-input').value.trim();
-        if (name) {
-            this.playerName = name;
-            localStorage.setItem('tabu_player_name', this.playerName);
-        }
+        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
+        this.playerName = name;
+        localStorage.setItem('tabu_player_name', name);
+
         const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-        window.location.search = `?room=${code}`;
+        this.roomCode = code;
+        this.joinRoom(code);
     },
 
     manualJoin() {
         let code = document.getElementById('join-code-input').value.trim().toUpperCase();
-        if (code.length === 5) {
-            const name = document.getElementById('login-name-input').value.trim();
-            if (name) {
-                this.playerName = name;
-                localStorage.setItem('tabu_player_name', this.playerName);
-            }
-            window.location.search = `?room=${code}`;
-        } else {
-            alert("5 karakterlik oda kodu girin!");
-        }
+        if (code.length !== 5) return alert("5 karakterlik oda kodu girin!");
+        
+        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
+        this.playerName = name;
+        localStorage.setItem('tabu_player_name', name);
+
+        this.roomCode = code;
+        this.joinRoom(code);
     },
 
     joinRoom(code) {
         this.roomRef = this.db.ref('rooms/' + code);
         this.roomRef.on('value', snap => {
             if (snap.exists()) ENGINE.update(snap.val());
-            else {
-                alert("Oda silinmiş veya bulunamadı!");
-                window.location = '';
-            }
+            else alert("Oda bulunamadı veya silinmiş!");
         });
 
         this.roomRef.child('players/' + this.myId).update({
@@ -69,6 +56,14 @@ const NET = {
 
     joinRole(team, role) {
         if (this.roomRef) this.roomRef.child('players/' + this.myId).update({ team, role });
+    },
+
+    copyRoomCode() {
+        if (this.roomCode) {
+            navigator.clipboard.writeText(this.roomCode).then(() => {
+                alert(`✅ Kodu kopyalandı!\nArkadaşına gönder: ${this.roomCode}`);
+            });
+        }
     }
 };
 

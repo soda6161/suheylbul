@@ -9,20 +9,18 @@ const ENGINE = {
         { m: "KİTAP", f: ["Sayfa","Roman","Kütüphane","Okumak","Yazar"] },
         { m: "UFO", f: ["Uzaylı","Disk","Işık","Gök","Yabancı"] },
         { m: "KEDİ", f: ["Hayvan","Patı","Miyav","Süt","Tüy"] },
-        { m: "TELEFON", f: ["Akıllı","Ekran","Arama","Mesaj","Şarj"] }
+        { m: "TELEFON", f: ["Akıllı","Ekran","Arama","Mesaj","Şarj"] },
+        { m: "ROKET", f: ["Uzay","Ateş","Hız","Yıldız","Gök"] },
+        { m: "KÖPEK", f: ["Havlama","Sadık","Kemik","Kuyruk","Patı"] }
     ],
 
     update(data) {
         this.roomData = data;
         const me = data.players?.[NET.myId];
-
         if (!me) return;
 
-        if (data.status === 'playing') {
-            this.renderGame(me, data);
-        } else {
-            this.renderLobby(data);
-        }
+        if (data.status === 'playing') this.renderGame(me, data);
+        else this.renderLobby(data);
     },
 
     renderLobby(data) {
@@ -32,13 +30,23 @@ const ENGINE = {
 
         const slots = { red: { anlatici: [], dinleyici: [] }, blue: { anlatici: [], dinleyici: [] } };
         Object.values(data.players || {}).forEach(p => {
-            if (p.team && p.role) slots[p.team][p.role].push(p.name || "Oyuncu");
+            if (p.team && p.role) slots[p.team][p.role].push(p.name);
         });
 
-        document.getElementById('slot-red-narrator').textContent = slots.red.anlatici[0] || 'Bekleniyor...';
-        document.getElementById('slot-red-guesser').textContent = slots.red.dinleyici[0] || 'Bekleniyor...';
-        document.getElementById('slot-blue-narrator').textContent = slots.blue.anlatici[0] || 'Bekleniyor...';
-        document.getElementById('slot-blue-guesser').textContent = slots.blue.dinleyici[0] || 'Bekleniyor...';
+        const makeList = (arr) => {
+            const container = document.createElement('div');
+            arr.forEach(name => {
+                const span = document.createElement('span');
+                span.textContent = name;
+                container.appendChild(span);
+            });
+            return container.innerHTML || '<span style="opacity:0.5">Bekleniyor...</span>';
+        };
+
+        document.getElementById('slot-red-narrator').innerHTML = makeList(slots.red.anlatici);
+        document.getElementById('slot-red-guesser').innerHTML = makeList(slots.red.dinleyici);
+        document.getElementById('slot-blue-narrator').innerHTML = makeList(slots.blue.anlatici);
+        document.getElementById('slot-blue-guesser').innerHTML = makeList(slots.blue.dinleyici);
     },
 
     renderGame(me, data) {
@@ -61,7 +69,7 @@ const ENGINE = {
             document.getElementById('word-forbidden').innerHTML = data.currentWord.f.join('<br>');
         } else {
             document.getElementById('word-main').textContent = "???";
-            document.getElementById('word-forbidden').innerHTML = "ARKADAŞINI DİNLE!<br>TAHMİNİNİ YAZ";
+            document.getElementById('word-forbidden').innerHTML = "ARKADAŞINI DİNLE!";
         }
 
         this.startTimer();
@@ -69,48 +77,32 @@ const ENGINE = {
 
     startGame() {
         const word = this.words[Math.floor(Math.random() * this.words.length)];
-        NET.roomRef.update({
-            status: 'playing',
-            currentWord: word,
-            scoreRed: 0,
-            scoreBlue: 0
-        });
+        NET.roomRef.update({ status: 'playing', currentWord: word, scoreRed: 0, scoreBlue: 0 });
     },
 
     startTimer() {
         if (this.timerInterval) clearInterval(this.timerInterval);
         let time = 60;
-        const timerEl = document.getElementById('timer-display');
-        timerEl.textContent = `00:${time}`;
+        const el = document.getElementById('timer-display');
+        el.textContent = `00:${time}`;
 
         this.timerInterval = setInterval(() => {
             time--;
-            timerEl.textContent = `00:${time < 10 ? '0' : ''}${time}`;
+            el.textContent = `00:${time < 10 ? '0' : ''}${time}`;
             if (time <= 0) {
                 clearInterval(this.timerInterval);
                 this.nextWord();
-                this.flash('rgba(255,165,0,0.5)');
             }
         }, 1000);
     },
 
-    reportCorrect() {
-        const teamKey = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
-        NET.roomRef.child(teamKey).set((this.roomData[teamKey] || 0) + 1);
-        this.nextWord();
-        this.flash('rgba(0,255,0,0.45)');
-    },
+    reportCorrect() { this.scoreChange(1); this.nextWord(); this.flash('#00cc44'); },
+    reportTabu() { this.scoreChange(-1); this.nextWord(); this.flash('#ff3333'); },
+    passCard() { this.nextWord(); this.flash('#ffaa00'); },
 
-    reportTabu() {
+    scoreChange(delta) {
         const teamKey = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
-        NET.roomRef.child(teamKey).set((this.roomData[teamKey] || 0) - 1);
-        this.nextWord();
-        this.flash('rgba(255,0,0,0.45)');
-    },
-
-    passCard() {
-        this.nextWord();
-        this.flash('rgba(255,165,0,0.45)');
+        NET.roomRef.child(teamKey).set((this.roomData[teamKey] || 0) + delta);
     },
 
     nextWord() {
@@ -121,7 +113,7 @@ const ENGINE = {
     submitGuess() {
         const input = document.getElementById('guess-input');
         if (input.value.trim()) {
-            alert(`Tahminin: "${input.value.trim()}"\nArkadaşların duydu! 🔥`);
+            alert(`Tahminin: "${input.value.trim()}" 🔥`);
             input.value = '';
         }
     },
@@ -129,7 +121,8 @@ const ENGINE = {
     flash(color) {
         const f = document.getElementById('flash-overlay');
         f.style.background = color;
+        f.style.opacity = '0.4';
         f.style.display = 'block';
-        setTimeout(() => f.style.display = 'none', 280);
+        setTimeout(() => { f.style.display = 'none'; f.style.opacity = '0'; }, 300);
     }
 };

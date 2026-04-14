@@ -1,12 +1,16 @@
 :root { --glass: rgba(255,255,255,0); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; }
+body, html { width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; font-family: system-ui, sans-serif; }
 
 #app { position: relative; width: 100vw; height: 100vh; max-width: 500px; overflow: hidden; }
-.screen { position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; display: none; }
+
+.screen { 
+    position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; 
+    display: none; color: white; 
+}
 .active { display: block; }
 
-/* GÖRSEL ATAMALARI (hepsi .png) */
+/* GÖRSELLER */
 #screen-login { background-image: url('bg-login.png'); }
 #screen-lobby { background-image: url('bg-lobby.png'); }
 .narrator-blue { background-image: url('bg-narrator-a.png'); }
@@ -14,88 +18,98 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: #000; disp
 .listener-blue { background-image: url('bg-listener-a.png'); }
 .listener-red { background-image: url('bg-listener-b.png'); }
 
-/* LOGIN - görsele tam oturdu */
-#login-name-input { 
-    position: absolute; top: 71%; left: 12%; width: 76%; height: 7.8%; 
-    background: white; border: none; border-radius: 14px; text-align: center; 
-    font-size: 1.45rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-#btn-create-room { 
-    position: absolute; top: 81%; left: 27%; width: 46%; height: 8.5%; cursor: pointer; background: var(--glass);
+/* LOGIN */
+#login-name-input {
+    position: absolute; top: 68%; left: 12%; width: 76%; height: 8%; 
+    background: rgba(255,255,255,0.95); border: none; border-radius: 9999px; 
+    text-align: center; font-size: 1.5rem; font-weight: bold; color: #222; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-/* Join alanı (küçük beyaz çubuğa tam oturuyor) */
-#join-area {
-    position: absolute; top: 91%; left: 12%; width: 76%; display: flex; gap: 10px; z-index: 10;
+.action-buttons {
+    position: absolute; top: 80%; left: 12%; width: 76%; display: flex; flex-direction: column; gap: 14px; align-items: center;
 }
-#join-code-input {
-    flex: 1; height: 7%; background: white; border: none; border-radius: 14px; 
-    text-align: center; font-size: 1.35rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+.big-btn {
+    width: 100%; height: 62px; background: #fff; color: #222; border-radius: 9999px; 
+    display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4); cursor: pointer;
 }
-#btn-join-room {
-    width: 32%; height: 7%; background: var(--glass); border-radius: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;
-}
+.big-btn.secondary { background: rgba(255,255,255,0.25); color: white; }
+.divider { font-size: 1.1rem; margin: 8px 0; opacity: 0.8; }
 
 /* LOBBY */
 #room-info {
-    position: absolute; top: 8%; left: 0; width: 100%; text-align: center;
-    font-size: 1.9rem; font-weight: bold; color: #fff; text-shadow: 0 0 15px #000; z-index: 10;
+    position: absolute; top: 6%; left: 0; width: 100%; text-align: center; font-size: 2rem; 
+    font-weight: bold; text-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer; z-index: 10;
 }
-.slot-grid {
-    position: absolute; top: 27%; left: 5%; width: 90%; height: 46%; 
-    display: flex; justify-content: space-between; z-index: 10;
+
+.teams-container {
+    position: absolute; top: 22%; left: 5%; width: 90%; height: 55%; display: flex; gap: 12px;
 }
-.team-box { width: 48%; height: 100%; display: flex; flex-direction: column; justify-content: space-around; padding: 10px 8px; }
-.team-box.red-team .role-btn { background: linear-gradient(#ffe0e0, #ffaaaa); border: 4px solid #c00; color: #c00; }
-.team-box.blue-team .role-btn { background: linear-gradient(#e0f0ff, #aaccff); border: 4px solid #00c; color: #00c; }
-.role-btn {
-    height: 22%; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.15rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+.team-panel {
+    flex: 1; border-radius: 24px; padding: 18px 14px; background: rgba(0,0,0,0.4); 
+    display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.player-name {
-    height: 22%; background: rgba(255,255,255,0.95); border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem; font-weight: bold; color: #222; box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+.red { border: 5px solid #ff3333; }
+.blue { border: 5px solid #3388ff; }
+
+.team-header {
+    text-align: center; font-size: 1.4rem; font-weight: bold; letter-spacing: 2px;
 }
-#btn-start-game { 
-    position: absolute; bottom: 8%; left: 33%; width: 34%; height: 9%; cursor: pointer; background: var(--glass); 
+.role-section { flex: 1; }
+.role-label {
+    font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; text-align: center; opacity: 0.9;
+}
+.players-list {
+    background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px; min-height: 80px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
+}
+.players-list span {
+    background: rgba(255,255,255,0.9); color: #222; padding: 6px 14px; border-radius: 9999px;
+    font-size: 1.05rem; font-weight: bold; white-space: nowrap;
+}
+
+#btn-start-game {
+    position: absolute; bottom: 8%; left: 12%; width: 76%; height: 8%; background: rgba(255,255,255,0.9);
+    color: #222; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 /* OYUN EKRANI */
 #game-stats {
     position: absolute; top: 5%; left: 5%; right: 5%; display: flex; justify-content: space-between;
-    font-size: 1.5rem; font-weight: bold; color: #fff; text-shadow: 2px 2px 8px #000; z-index: 20;
+    font-size: 1.6rem; font-weight: bold; text-shadow: 0 4px 12px #000; z-index: 20;
 }
-#word-card { 
-    position: absolute; top: 18%; left: 11%; width: 78%; height: 52%; 
-    background: rgba(255,255,255,0.94); border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 25px 15px; text-align: center;
-}
-#word-main { font-size: 2.8rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; }
-#word-forbidden { font-size: 1.4rem; color: #444; line-height: 1.8; }
 
-.controls-overlay {
-    position: absolute; bottom: 5%; left: 5%; width: 90%; display: none; z-index: 30;
+#word-card {
+    position: absolute; top: 18%; left: 8%; width: 84%; height: 52%; 
+    background: rgba(255,255,255,0.95); border-radius: 28px; box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px 20px; text-align: center; color: #222;
 }
-#narrator-controls { display: flex; gap: 4%; }
-#btn-tabu, #btn-pass, #btn-correct {
-    flex: 1; height: 13.5%; border-radius: 16px; cursor: pointer; background: var(--glass);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.35); font-weight: bold; font-size: 1.1rem;
-    display: flex; align-items: center; justify-content: center;
+#word-main { font-size: 2.9rem; font-weight: 900; margin-bottom: 22px; }
+#word-forbidden { font-size: 1.45rem; line-height: 1.75; }
+
+.controls {
+    position: absolute; bottom: 6%; left: 5%; width: 90%; display: none; gap: 12px; z-index: 30;
 }
-#listener-controls { flex-direction: column; align-items: center; gap: 10px; }
+#narrator-controls { display: flex; }
+#listener-controls { flex-direction: column; align-items: center; gap: 12px; }
+
+.game-btn {
+    flex: 1; height: 68px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem; font-weight: bold; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+.tabu { background: #ff3333; color: white; }
+.pass { background: #ffaa00; color: white; }
+.correct { background: #00cc44; color: white; }
+.send { background: #222; color: white; width: 48%; height: 58px; }
+
 #guess-input {
-    width: 82%; height: 52px; background: white; border: none; border-radius: 16px;
-    text-align: center; font-size: 1.35rem; box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-}
-#btn-send-guess {
-    width: 48%; height: 48px; background: #2c3e50; color: white; border-radius: 16px;
-    display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer;
+    width: 82%; height: 58px; background: white; border: none; border-radius: 9999px;
+    text-align: center; font-size: 1.4rem; color: #222; box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 #flash-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
-    display: none; z-index: 1000; transition: all 0.2s; 
+    display: none; z-index: 1000; 
 }

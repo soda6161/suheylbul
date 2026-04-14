@@ -10,38 +10,54 @@
 </head>
 <body>
     <div id="app">
-        <!-- LOGIN -->
+
+        <!-- LOGIN EKRANI -->
         <div id="screen-login" class="screen active">
             <input id="login-name-input" type="text" placeholder="İSMİNİ YAZ" maxlength="15">
-            <div id="btn-create-room" class="hitbox" onclick="NET.createRoom()">ODA OLUŞTUR</div>
             
-            <!-- Join bölümü (görselin altındaki küçük beyaz çubuğa oturuyor) -->
-            <div id="join-area">
-                <input id="join-code-input" type="text" placeholder="ODA KODU GİR" maxlength="5" style="text-transform:uppercase">
-                <div id="btn-join-room" class="hitbox" onclick="NET.manualJoin()">KATIL</div>
+            <div class="action-buttons">
+                <div class="big-btn" onclick="NET.createRoom()">ODA OLUŞTUR</div>
+                <div class="divider">veya</div>
+                <input id="join-code-input" type="text" placeholder="ODA KODU (5 karakter)" maxlength="5" style="text-transform:uppercase">
+                <div class="big-btn secondary" onclick="NET.manualJoin()">KOD İLE KATIL</div>
             </div>
         </div>
 
-        <!-- LOBBY -->
+        <!-- LOBBY EKRANI -->
         <div id="screen-lobby" class="screen">
-            <div id="room-info">ODA KODU: <span id="room-code-display">---</span></div>
-            
-            <div class="slot-grid">
-                <div class="team-box red-team">
-                    <div class="role-btn" onclick="NET.joinRole('red', 'anlatici')">ANLATICI</div>
-                    <div id="slot-red-narrator" class="player-name">Bekleniyor...</div>
-                    <div class="role-btn" onclick="NET.joinRole('red', 'dinleyici')">TAHMİNCİ</div>
-                    <div id="slot-red-guesser" class="player-name">Bekleniyor...</div>
+            <div id="room-info">
+                ODA KODU: <span id="room-code-display" onclick="NET.copyRoomCode()">------</span>
+            </div>
+
+            <div class="teams-container">
+                <!-- Kırmızı Takım -->
+                <div class="team-panel red">
+                    <div class="team-header">KIRMIZI TAKIM 🔥</div>
+                    <div class="role-section">
+                        <div class="role-label">ANLATICI</div>
+                        <div id="slot-red-narrator" class="players-list"></div>
+                    </div>
+                    <div class="role-section">
+                        <div class="role-label">TAHMİNCİLER</div>
+                        <div id="slot-red-guesser" class="players-list"></div>
+                    </div>
                 </div>
-                <div class="team-box blue-team">
-                    <div class="role-btn" onclick="NET.joinRole('blue', 'anlatici')">ANLATICI</div>
-                    <div id="slot-blue-narrator" class="player-name">Bekleniyor...</div>
-                    <div class="role-btn" onclick="NET.joinRole('blue', 'dinleyici')">TAHMİNCİ</div>
-                    <div id="slot-blue-guesser" class="player-name">Bekleniyor...</div>
+
+                <!-- Mavi Takım -->
+                <div class="team-panel blue">
+                    <div class="team-header">MAVİ TAKIM ❄️</div>
+                    <div class="role-section">
+                        <div class="role-label">ANLATICI</div>
+                        <div id="slot-blue-narrator" class="players-list"></div>
+                    </div>
+                    <div class="role-section">
+                        <div class="role-label">TAHMİNCİLER</div>
+                        <div id="slot-blue-guesser" class="players-list"></div>
+                    </div>
                 </div>
             </div>
 
-            <div id="btn-start-game" class="hitbox" onclick="ENGINE.startGame()">OYUNU BAŞLAT</div>
+            <div id="btn-start-game" onclick="ENGINE.startGame()">OYUNU BAŞLAT</div>
         </div>
 
         <!-- OYUN EKRANI -->
@@ -56,15 +72,15 @@
                 <div id="word-forbidden"></div>
             </div>
 
-            <div id="narrator-controls" class="controls-overlay">
-                <div id="btn-tabu" class="hitbox game-btn" onclick="ENGINE.reportTabu()">TABU</div>
-                <div id="btn-pass" class="hitbox game-btn" onclick="ENGINE.passCard()">PAS</div>
-                <div id="btn-correct" class="hitbox game-btn" onclick="ENGINE.reportCorrect()">DOĞRU</div>
+            <div id="narrator-controls" class="controls">
+                <div class="game-btn tabu" onclick="ENGINE.reportTabu()">TABU</div>
+                <div class="game-btn pass" onclick="ENGINE.passCard()">PAS</div>
+                <div class="game-btn correct" onclick="ENGINE.reportCorrect()">DOĞRU</div>
             </div>
 
-            <div id="listener-controls" class="controls-overlay">
+            <div id="listener-controls" class="controls">
                 <input id="guess-input" type="text" placeholder="TAHMİNİNİ YAZ...">
-                <div id="btn-send-guess" onclick="ENGINE.submitGuess()">GÖNDER</div>
+                <div class="game-btn send" onclick="ENGINE.submitGuess()">GÖNDER</div>
             </div>
         </div>
 
