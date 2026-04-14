@@ -1,65 +1,52 @@
+// game-engine.js revize edilmiş bölümler
+
 const ENGINE = {
-    roomData: null,
-    words: [
-        { m: "KORSAN", f: ["Gemi", "Deniz", "Kanca", "Hazine", "Papağan"] },
-        { m: "TELEFON", f: ["Arama", "Ekran", "Mesaj", "Akıllı", "Tuş"] },
-        { m: "İSTANBUL", f: ["Boğaz", "Deniz", "Şehir", "Kalabalık", "Metropol"] }
-    ],
+    // ... mevcut veriler ...
+
     update(data) {
         this.roomData = data;
         const me = data.players?.[NET.myId];
+        
         if (data.status === 'playing') {
             this.renderGame(me, data);
         } else {
             this.renderLobby(data);
         }
     },
-    renderLobby(data) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-lobby').classList.add('active');
-    },
+
     renderGame(me, data) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const screen = document.getElementById('screen-game');
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         screen.classList.add('active');
-        const role = me.role === 'anlatici' ? 'narrator' : 'listener';
-        const team = me.team === 'blue' ? 'blue' : 'red';
-        screen.className = `screen active ${role}-${team}`;
-        document.getElementById('narrator-controls').style.display = me.role === 'anlatici' ? 'block' : 'none';
+
+        // Takım ve Role göre arka plan değiştirme
+        const roleClass = me.role === 'anlatici' ? 'narrator' : 'listener';
+        const teamClass = me.team === 'blue' ? 'blue' : 'red';
+        screen.className = `screen active ${roleClass}-${teamClass}`;
+
+        const wordMain = document.getElementById('word-main');
+        const wordForbidden = document.getElementById('word-forbidden');
+        const narratorControls = document.getElementById('narrator-controls');
+
         if (me.role === 'anlatici') {
-            document.getElementById('word-main').textContent = data.currentWord.m;
-            document.getElementById('word-forbidden').innerHTML = data.currentWord.f.join('<br>');
+            // Anlatıcı kelimeleri görür
+            wordMain.textContent = data.currentWord.m;
+            wordForbidden.innerHTML = data.currentWord.f.join('<br>');
+            narratorControls.style.display = 'block';
         } else {
-            document.getElementById('word-main').textContent = "???";
-            document.getElementById('word-forbidden').textContent = "ARKADAŞINI DİNLE!";
+            // Dinleyici kelimeleri görmez, heyecanı korur
+            wordMain.textContent = "???";
+            wordForbidden.textContent = "TAKIM ARKADAŞINI DİNLE VE TAHMİN ET!";
+            narratorControls.style.display = 'none';
         }
+
+        // Puan Güncelleme
+        document.getElementById('score-display').textContent = `KIRMIZI: ${data.scoreRed || 0} | MAVİ: ${data.scoreBlue || 0}`;
     },
-    startGame() {
-        NET.roomRef.update({
-            status: 'playing',
-            currentWord: this.words[Math.floor(Math.random() * this.words.length)],
-            scoreRed: 0, scoreBlue: 0
-        });
-    },
-    reportCorrect() {
-        const key = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
-        NET.roomRef.child(key).set((this.roomData[key] || 0) + 1);
+
+    // Pas geçme fonksiyonu eksikti, ekledim
+    passCard() {
+        this.flash('rgba(255, 255, 255, 0.3)');
         this.nextWord();
-        this.flash('rgba(0,255,0,0.5)');
-    },
-    reportTabu() {
-        const key = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
-        NET.roomRef.child(key).set((this.roomData[key] || 0) - 1);
-        this.nextWord();
-        this.flash('rgba(255,0,0,0.5)');
-    },
-    nextWord() {
-        const word = this.words[Math.floor(Math.random() * this.words.length)];
-        NET.roomRef.update({ currentWord: word });
-    },
-    flash(color) {
-        const f = document.getElementById('flash-overlay');
-        f.style.background = color; f.style.display = 'block';
-        setTimeout(() => f.style.display = 'none', 200);
     }
 };
