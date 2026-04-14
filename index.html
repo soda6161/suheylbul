@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tabu Ultra</title>
+    <link rel="stylesheet" href="style-game.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="https://unpkg.com/@discord/embedded-app-sdk"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="screen-login" class="screen active">
+            <input id="login-name-input" type="text" placeholder="İSMİNİ YAZ">
+            <div id="btn-create-room" class="hitbox" onclick="NET.createRoom()"></div>
+        </div>
+
+        <div id="screen-lobby" class="screen">
+            <div id="room-link-display">Oda Bekleniyor...</div>
+            <select id="select-time">
+                <option value="60">60 Saniye</option>
+                <option value="90">90 Saniye</option>
+            </select>
+            <div id="btn-start-game" class="hitbox" onclick="ENGINE.startGame()"></div>
+            
+            <div class="slot-container">
+                <div class="slot" id="slot-blue-anlatici" onclick="NET.joinRole('blue', 'anlatici')">Mavi Anlatıcı</div>
+                <div class="slot" id="slot-blue-dinleyici" onclick="NET.joinRole('blue', 'dinleyici')">Mavi Tahminci</div>
+                <div class="slot" id="slot-red-anlatici" onclick="NET.joinRole('red', 'anlatici')">Kırmızı Anlatıcı</div>
+                <div class="slot" id="slot-red-dinleyici" onclick="NET.joinRole('red', 'dinleyici')">Kırmızı Tahminci</div>
+            </div>
+        </div>
+
+        <div id="screen-game" class="screen">
+            <div id="game-stats">
+                <span id="timer-display">00:00</span>
+                <span id="score-display">A: 0 | B: 0</span>
+            </div>
+            <div id="word-main"></div>
+            <div id="word-forbidden"></div>
+
+            <div id="guess-area" style="display:none;">
+                <input id="guess-entry" type="text" placeholder="TAHMİNİNİZ...">
+                <button onclick="ENGINE.submitGuess()">GÖNDER</button>
+            </div>
+
+            <div id="narrator-controls" style="display:none;">
+                <div id="btn-tabu" class="hitbox" onclick="ENGINE.reportTabu()"></div>
+                <div id="btn-correct" class="hitbox" onclick="ENGINE.reportCorrect()"></div>
+                <div id="btn-pass" class="hitbox" onclick="ENGINE.passCard()"></div>
+            </div>
+        </div>
+        <div id="flash-overlay"></div>
+    </div>
+
+    <script src="network-core.js"></script>
+    <script src="game-engine.js"></script>
+</body>
+</html>
