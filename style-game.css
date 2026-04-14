@@ -1,4 +1,4 @@
-:root { --glass: rgba(255, 255, 255, 0); }
+:root { --glass: rgba(255,255,255,0); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body, html { width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; }
 
@@ -6,103 +6,96 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: #000; disp
 .screen { position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; display: none; }
 .active { display: block; }
 
-/* Görsel Atamaları */
+/* GÖRSEL ATAMALARI (hepsi .png) */
 #screen-login { background-image: url('bg-login.png'); }
-#screen-lobby { background-image: url('bg-lobby.jpg'); }
+#screen-lobby { background-image: url('bg-lobby.png'); }
 .narrator-blue { background-image: url('bg-narrator-a.png'); }
 .narrator-red { background-image: url('bg-narrator-b.png'); }
 .listener-blue { background-image: url('bg-listener-a.png'); }
 .listener-red { background-image: url('bg-listener-b.png'); }
 
-/* 1. GİRİŞ EKRANI - Beyaz kutulara tam oturdu */
+/* LOGIN - görsele tam oturdu */
 #login-name-input { 
-    position: absolute; top: 71%; left: 12%; width: 76%; height: 7.5%; 
-    background: white; border: none; text-align: center; font-size: 1.45rem; border-radius: 12px; font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: absolute; top: 71%; left: 12%; width: 76%; height: 7.8%; 
+    background: white; border: none; border-radius: 14px; text-align: center; 
+    font-size: 1.45rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 #btn-create-room { 
-    position: absolute; top: 82%; left: 27.5%; width: 45%; height: 8.5%; cursor: pointer; background: var(--glass); 
+    position: absolute; top: 81%; left: 27%; width: 46%; height: 8.5%; cursor: pointer; background: var(--glass);
 }
 
-/* 2. LOBİ EKRANI - Beyaz karelere tam oturdu */
+/* Join alanı (küçük beyaz çubuğa tam oturuyor) */
+#join-area {
+    position: absolute; top: 91%; left: 12%; width: 76%; display: flex; gap: 10px; z-index: 10;
+}
+#join-code-input {
+    flex: 1; height: 7%; background: white; border: none; border-radius: 14px; 
+    text-align: center; font-size: 1.35rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+#btn-join-room {
+    width: 32%; height: 7%; background: var(--glass); border-radius: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem;
+}
+
+/* LOBBY */
 #room-info {
-    position: absolute; top: 8%; left: 10%; width: 80%; text-align: center;
-    font-size: 1.85rem; font-weight: bold; color: #fff; text-shadow: 0 0 12px #000; z-index: 10;
+    position: absolute; top: 8%; left: 0; width: 100%; text-align: center;
+    font-size: 1.9rem; font-weight: bold; color: #fff; text-shadow: 0 0 15px #000; z-index: 10;
 }
-
 .slot-grid {
-    position: absolute; top: 27.5%; left: 5%; width: 90%; height: 43%; 
+    position: absolute; top: 27%; left: 5%; width: 90%; height: 46%; 
     display: flex; justify-content: space-between; z-index: 10;
 }
-
-.team-box {
-    width: 48%; height: 100%; display: flex; flex-direction: column; 
-    justify-content: space-around; padding: 12px 8px; box-sizing: border-box;
-}
-
-.team-box.red-team .role-btn { background: linear-gradient(#ffe0e0, #ffaaaa); border: 3px solid #c00; color: #c00; }
-.team-box.blue-team .role-btn { background: linear-gradient(#e0e0ff, #aaaaff); border: 3px solid #00c; color: #00c; }
-
+.team-box { width: 48%; height: 100%; display: flex; flex-direction: column; justify-content: space-around; padding: 10px 8px; }
+.team-box.red-team .role-btn { background: linear-gradient(#ffe0e0, #ffaaaa); border: 4px solid #c00; color: #c00; }
+.team-box.blue-team .role-btn { background: linear-gradient(#e0f0ff, #aaccff); border: 4px solid #00c; color: #00c; }
 .role-btn {
-    height: 22%; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    height: 22%; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 12px rgba(0,0,0,0.3);
 }
-
 .player-name {
-    height: 22%; background: rgba(255,255,255,0.9); border-radius: 12px;
+    height: 22%; background: rgba(255,255,255,0.95); border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.25rem; font-weight: bold; color: #222; box-shadow: inset 0 3px 6px rgba(0,0,0,0.15);
+    font-size: 1.3rem; font-weight: bold; color: #222; box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
 }
-
-#select-time {
-    position: absolute; top: 73%; left: 34%; width: 32%; height: 8%;
-    background: white; border: none; border-radius: 12px; font-size: 1.35rem;
-    font-weight: bold; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10;
-}
-
 #btn-start-game { 
-    position: absolute; bottom: 8%; left: 34%; width: 32%; height: 8.5%; cursor: pointer; background: var(--glass); 
+    position: absolute; bottom: 8%; left: 33%; width: 34%; height: 9%; cursor: pointer; background: var(--glass); 
 }
 
-/* 3. OYUN EKRANI */
+/* OYUN EKRANI */
 #game-stats {
-    position: absolute; top: 5%; left: 5%; width: 90%; display: flex; justify-content: space-between;
-    font-size: 1.45rem; font-weight: bold; color: #fff; text-shadow: 2px 2px 6px rgba(0,0,0,0.8); z-index: 20;
+    position: absolute; top: 5%; left: 5%; right: 5%; display: flex; justify-content: space-between;
+    font-size: 1.5rem; font-weight: bold; color: #fff; text-shadow: 2px 2px 8px #000; z-index: 20;
 }
-
 #word-card { 
     position: absolute; top: 18%; left: 11%; width: 78%; height: 52%; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; 
-    background: rgba(255,255,255,0.92); border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    padding: 20px 15px; text-align: center;
+    background: rgba(255,255,255,0.94); border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 25px 15px; text-align: center;
 }
-#word-main { font-size: 2.7rem; font-weight: bold; color: #2c3e50; margin-bottom: 18px; line-height: 1.1; }
-#word-forbidden { font-size: 1.35rem; color: #444; line-height: 1.75; }
+#word-main { font-size: 2.8rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; }
+#word-forbidden { font-size: 1.4rem; color: #444; line-height: 1.8; }
 
-#narrator-controls, #listener-controls {
-    position: absolute; bottom: 5%; left: 5%; width: 90%; z-index: 30;
+.controls-overlay {
+    position: absolute; bottom: 5%; left: 5%; width: 90%; display: none; z-index: 30;
 }
-
 #narrator-controls { display: flex; gap: 4%; }
 #btn-tabu, #btn-pass, #btn-correct {
-    flex: 1; height: 13%; border-radius: 14px; cursor: pointer; background: var(--glass);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    flex: 1; height: 13.5%; border-radius: 16px; cursor: pointer; background: var(--glass);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35); font-weight: bold; font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
 }
-
-#listener-controls {
-    display: none; flex-direction: column; align-items: center; gap: 8px;
-}
+#listener-controls { flex-direction: column; align-items: center; gap: 10px; }
 #guess-input {
-    width: 82%; height: 52%; background: white; border: none; border-radius: 14px;
-    text-align: center; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    width: 82%; height: 52px; background: white; border: none; border-radius: 16px;
+    text-align: center; font-size: 1.35rem; box-shadow: 0 5px 15px rgba(0,0,0,0.25);
 }
 #btn-send-guess {
-    width: 45%; height: 42%; background: #2c3e50; color: white; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;
-    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    width: 48%; height: 48px; background: #2c3e50; color: white; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer;
 }
 
 #flash-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
-    display: none; z-index: 1000; transition: opacity 0.2s; 
+    display: none; z-index: 1000; transition: all 0.2s; 
 }

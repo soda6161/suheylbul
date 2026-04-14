@@ -1,16 +1,23 @@
 const ENGINE = {
     roomData: null,
+    timerInterval: null,
     words: [
-        { m: "KORSAN", f: ["Gemi", "Deniz", "Kanca", "Hazine", "Papağan"] },
-        { m: "PİZZA", f: ["Hamur", "İtalyan", "Peynir", "Dilim", "Sucuk"] },
-        { m: "ASTRONOT", f: ["Uzay", "Ay", "Roket", "Kıyafet", "Yıldız"] },
-        { m: "VAMPİR", f: ["Diş", "Gece", "Kan", "Pelerin", "Sarımsak"] },
-        { m: "KİTAP", f: ["Sayfa", "Roman", "Kütüphane", "Okumak", "Yazar"] }
+        { m: "KORSAN", f: ["Gemi","Deniz","Kanca","Hazine","Papağan"] },
+        { m: "PİZZA", f: ["Hamur","İtalyan","Peynir","Dilim","Sucuk"] },
+        { m: "ASTRONOT", f: ["Uzay","Ay","Roket","Kıyafet","Yıldız"] },
+        { m: "VAMPİR", f: ["Diş","Gece","Kan","Pelerin","Sarımsak"] },
+        { m: "KİTAP", f: ["Sayfa","Roman","Kütüphane","Okumak","Yazar"] },
+        { m: "UFO", f: ["Uzaylı","Disk","Işık","Gök","Yabancı"] },
+        { m: "KEDİ", f: ["Hayvan","Patı","Miyav","Süt","Tüy"] },
+        { m: "TELEFON", f: ["Akıllı","Ekran","Arama","Mesaj","Şarj"] }
     ],
 
     update(data) {
         this.roomData = data;
         const me = data.players?.[NET.myId];
+
+        if (!me) return;
+
         if (data.status === 'playing') {
             this.renderGame(me, data);
         } else {
@@ -21,9 +28,8 @@ const ENGINE = {
     renderLobby(data) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-lobby').classList.add('active');
-        document.getElementById('room-code-display').textContent = NET.roomCode || "---";
+        document.getElementById('room-code-display').textContent = NET.roomCode;
 
-        // === YENİ: Oyuncu slotlarını gerçek zamanlı doldur ===
         const slots = { red: { anlatici: [], dinleyici: [] }, blue: { anlatici: [], dinleyici: [] } };
         Object.values(data.players || {}).forEach(p => {
             if (p.team && p.role) slots[p.team][p.role].push(p.name || "Oyuncu");
@@ -44,17 +50,21 @@ const ENGINE = {
         const role = me.role === 'anlatici' ? 'narrator' : 'listener';
         screen.className = `screen active ${role}-${team}`;
 
-        const isAnlatici = me.role === 'anlatici';
-        document.getElementById('narrator-controls').style.display = isAnlatici ? 'flex' : 'none';
-        document.getElementById('listener-controls').style.display = isAnlatici ? 'none' : 'flex';
+        const isNarrator = me.role === 'anlatici';
+        document.getElementById('narrator-controls').style.display = isNarrator ? 'flex' : 'none';
+        document.getElementById('listener-controls').style.display = isNarrator ? 'none' : 'flex';
 
-        if (isAnlatici) {
+        document.getElementById('score-display').textContent = `K: ${data.scoreRed || 0} | M: ${data.scoreBlue || 0}`;
+
+        if (isNarrator) {
             document.getElementById('word-main').textContent = data.currentWord.m;
             document.getElementById('word-forbidden').innerHTML = data.currentWord.f.join('<br>');
         } else {
             document.getElementById('word-main').textContent = "???";
-            document.getElementById('word-forbidden').textContent = "ARKADAŞINI DİNLE!";
+            document.getElementById('word-forbidden').innerHTML = "ARKADAŞINI DİNLE!<br>TAHMİNİNİ YAZ";
         }
+
+        this.startTimer();
     },
 
     startGame() {
@@ -67,23 +77,40 @@ const ENGINE = {
         });
     },
 
+    startTimer() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        let time = 60;
+        const timerEl = document.getElementById('timer-display');
+        timerEl.textContent = `00:${time}`;
+
+        this.timerInterval = setInterval(() => {
+            time--;
+            timerEl.textContent = `00:${time < 10 ? '0' : ''}${time}`;
+            if (time <= 0) {
+                clearInterval(this.timerInterval);
+                this.nextWord();
+                this.flash('rgba(255,165,0,0.5)');
+            }
+        }, 1000);
+    },
+
     reportCorrect() {
         const teamKey = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
         NET.roomRef.child(teamKey).set((this.roomData[teamKey] || 0) + 1);
         this.nextWord();
-        this.flash('rgba(0, 255, 0, 0.45)');
+        this.flash('rgba(0,255,0,0.45)');
     },
 
     reportTabu() {
         const teamKey = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
         NET.roomRef.child(teamKey).set((this.roomData[teamKey] || 0) - 1);
         this.nextWord();
-        this.flash('rgba(255, 0, 0, 0.45)');
+        this.flash('rgba(255,0,0,0.45)');
     },
 
     passCard() {
         this.nextWord();
-        this.flash('rgba(255, 165, 0, 0.45)'); // pass = turuncu
+        this.flash('rgba(255,165,0,0.45)');
     },
 
     nextWord() {
@@ -93,9 +120,8 @@ const ENGINE = {
 
     submitGuess() {
         const input = document.getElementById('guess-input');
-        const guess = input.value.trim();
-        if (guess) {
-            alert(`Tahminin: "${guess}"\n(Arkadaşların duydu! 🔥)`);
+        if (input.value.trim()) {
+            alert(`Tahminin: "${input.value.trim()}"\nArkadaşların duydu! 🔥`);
             input.value = '';
         }
     },
@@ -104,6 +130,6 @@ const ENGINE = {
         const f = document.getElementById('flash-overlay');
         f.style.background = color;
         f.style.display = 'block';
-        setTimeout(() => f.style.display = 'none', 220);
+        setTimeout(() => f.style.display = 'none', 280);
     }
 };

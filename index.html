@@ -7,38 +7,44 @@
     <link rel="stylesheet" href="style-game.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <script src="https://unpkg.com/@discord/embedded-app-sdk"></script>
 </head>
 <body>
     <div id="app">
+        <!-- LOGIN -->
         <div id="screen-login" class="screen active">
-            <input id="login-name-input" type="text" placeholder="İSMİNİ YAZ">
-            <div id="btn-create-room" class="hitbox" onclick="NET.createRoom()"></div>
+            <input id="login-name-input" type="text" placeholder="İSMİNİ YAZ" maxlength="15">
+            <div id="btn-create-room" class="hitbox" onclick="NET.createRoom()">ODA OLUŞTUR</div>
+            
+            <!-- Join bölümü (görselin altındaki küçük beyaz çubuğa oturuyor) -->
+            <div id="join-area">
+                <input id="join-code-input" type="text" placeholder="ODA KODU GİR" maxlength="5" style="text-transform:uppercase">
+                <div id="btn-join-room" class="hitbox" onclick="NET.manualJoin()">KATIL</div>
+            </div>
         </div>
 
+        <!-- LOBBY -->
         <div id="screen-lobby" class="screen">
-            <div id="room-info">ODA: <span id="room-code-display">---</span></div>
+            <div id="room-info">ODA KODU: <span id="room-code-display">---</span></div>
+            
             <div class="slot-grid">
                 <div class="team-box red-team">
-                    <div class="role-btn" onclick="NET.joinRole('red', 'anlatici')">ANLATICI SEÇ</div>
+                    <div class="role-btn" onclick="NET.joinRole('red', 'anlatici')">ANLATICI</div>
                     <div id="slot-red-narrator" class="player-name">Bekleniyor...</div>
-                    <div class="role-btn" onclick="NET.joinRole('red', 'dinleyici')">TAHMİNCİ SEÇ</div>
+                    <div class="role-btn" onclick="NET.joinRole('red', 'dinleyici')">TAHMİNCİ</div>
                     <div id="slot-red-guesser" class="player-name">Bekleniyor...</div>
                 </div>
                 <div class="team-box blue-team">
-                    <div class="role-btn" onclick="NET.joinRole('blue', 'anlatici')">ANLATICI SEÇ</div>
+                    <div class="role-btn" onclick="NET.joinRole('blue', 'anlatici')">ANLATICI</div>
                     <div id="slot-blue-narrator" class="player-name">Bekleniyor...</div>
-                    <div class="role-btn" onclick="NET.joinRole('blue', 'dinleyici')">TAHMİNCİ SEÇ</div>
+                    <div class="role-btn" onclick="NET.joinRole('blue', 'dinleyici')">TAHMİNCİ</div>
                     <div id="slot-blue-guesser" class="player-name">Bekleniyor...</div>
                 </div>
             </div>
-            <select id="select-time">
-                <option value="60">60 SN</option>
-                <option value="90">90 SN</option>
-            </select>
-            <div id="btn-start-game" class="hitbox" onclick="ENGINE.startGame()"></div>
+
+            <div id="btn-start-game" class="hitbox" onclick="ENGINE.startGame()">OYUNU BAŞLAT</div>
         </div>
 
+        <!-- OYUN EKRANI -->
         <div id="screen-game" class="screen">
             <div id="game-stats">
                 <div id="timer-display">00:00</div>
@@ -51,19 +57,20 @@
             </div>
 
             <div id="narrator-controls" class="controls-overlay">
-                <div id="btn-tabu" class="hitbox game-btn" onclick="ENGINE.reportTabu()"></div>
-                <div id="btn-pass" class="hitbox game-btn" onclick="ENGINE.passCard()"></div>
-                <div id="btn-correct" class="hitbox game-btn" onclick="ENGINE.reportCorrect()"></div>
+                <div id="btn-tabu" class="hitbox game-btn" onclick="ENGINE.reportTabu()">TABU</div>
+                <div id="btn-pass" class="hitbox game-btn" onclick="ENGINE.passCard()">PAS</div>
+                <div id="btn-correct" class="hitbox game-btn" onclick="ENGINE.reportCorrect()">DOĞRU</div>
             </div>
 
-            <div id="listener-controls" class="controls-overlay" style="display:none;">
-                <input id="guess-input" type="text" placeholder="TAHMİNİNİZİ YAZIN...">
+            <div id="listener-controls" class="controls-overlay">
+                <input id="guess-input" type="text" placeholder="TAHMİNİNİ YAZ...">
                 <div id="btn-send-guess" onclick="ENGINE.submitGuess()">GÖNDER</div>
             </div>
         </div>
-        
+
         <div id="flash-overlay"></div>
     </div>
+
     <script src="network-core.js"></script>
     <script src="game-engine.js"></script>
 </body>
