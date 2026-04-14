@@ -16,52 +16,89 @@ const NET = {
         this.myId = localStorage.getItem('tabu_uid') || Math.random().toString(36).substring(2, 10);
         localStorage.setItem('tabu_uid', this.myId);
         this.playerName = localStorage.getItem('tabu_player_name') || "Oyuncu";
+
+        // URL'den oda kodu kontrolü
+        const params = new URLSearchParams(window.location.search);
+        this.roomCode = params.get('room');
+        if (this.roomCode) {
+            this.joinExistingRoom(this.roomCode);
+        }
     },
 
     createRoom() {
-        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
-        this.playerName = name;
-        localStorage.setItem('tabu_player_name', name);
+        const nameInput = document.getElementById('login-name-input').value.trim();
+        if (nameInput) {
+            this.playerName = nameInput;
+            localStorage.setItem('tabu_player_name', this.playerName);
+        }
 
         const code = Math.random().toString(36).substring(2, 7).toUpperCase();
         this.roomCode = code;
-        this.joinRoom(code);
+
+        // Direkt URL değiştir + oda oluştur
+        window.location.href = `?room=${code}`;
+        // (Yukarıdaki satır sayfayı yeniler ve init() otomatik join yapacak)
     },
 
     manualJoin() {
         let code = document.getElementById('join-code-input').value.trim().toUpperCase();
-        if (code.length !== 5) return alert("5 karakterlik oda kodu girin!");
-        
-        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
-        this.playerName = name;
-        localStorage.setItem('tabu_player_name', name);
-
+        if (code.length !== 5) {
+            alert("Lütfen 5 karakterlik geçerli bir oda kodu girin!");
+            return;
+        }
+        const nameInput = document.getElementById('login-name-input').value.trim();
+        if (nameInput) {
+            this.playerName = nameInput;
+            localStorage.setItem('tabu_player_name', this.playerName);
+        }
         this.roomCode = code;
-        this.joinRoom(code);
+        window.location.href = `?room=${code}`;
     },
 
-    joinRoom(code) {
+    joinExistingRoom(code) {
         this.roomRef = this.db.ref('rooms/' + code);
-        this.roomRef.on('value', snap => {
-            if (snap.exists()) ENGINE.update(snap.val());
-            else alert("Oda bulunamadı veya silinmiş!");
+
+        // Listener'ı kur
+        this.roomRef.on('value', (snap) => {
+            if (snap.exists()) {
+                ENGINE.update(snap.val());
+            } else {
+                // Oda yoksa oluştur (ilk oyuncu için)
+                this.roomRef.set({
+                    status: 'lobby',
+                    players: {},
+                    scoreRed: 0,
+                    scoreBlue: 0
+                }).then(() => {
+                    this.addPlayerToRoom();
+                }).catch(err => console.error("Oda oluşturma hatası:", err));
+            }
         });
 
+        // Oyuncuyu ekle (eğer oda varsa direkt ekle)
+        setTimeout(() => this.addPlayerToRoom(), 300);
+    },
+
+    addPlayerToRoom() {
+        if (!this.roomRef) return;
         this.roomRef.child('players/' + this.myId).update({
             name: this.playerName,
             team: 'blue',
-            role: 'anlatici'
-        });
+            role: 'anlatici',
+            joinedAt: Date.now()
+        }).catch(err => console.error("Oyuncu ekleme hatası:", err));
     },
 
     joinRole(team, role) {
-        if (this.roomRef) this.roomRef.child('players/' + this.myId).update({ team, role });
+        if (this.roomRef) {
+            this.roomRef.child('players/' + this.myId).update({ team, role });
+        }
     },
 
     copyRoomCode() {
         if (this.roomCode) {
             navigator.clipboard.writeText(this.roomCode).then(() => {
-                alert(`✅ Kodu kopyalandı!\nArkadaşına gönder: ${this.roomCode}`);
+                alert(`✅ Oda kodu kopyalandı: ${this.roomCode}\nArkadaşına gönder!`);
             });
         }
     }
