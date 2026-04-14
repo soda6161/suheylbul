@@ -17,7 +17,6 @@ const NET = {
         localStorage.setItem('tabu_uid', this.myId);
         this.playerName = localStorage.getItem('tabu_player_name') || "Oyuncu";
 
-        // URL'den oda kodu kontrolü
         const params = new URLSearchParams(window.location.search);
         this.roomCode = params.get('room');
         if (this.roomCode) {
@@ -26,81 +25,64 @@ const NET = {
     },
 
     createRoom() {
-        const nameInput = document.getElementById('login-name-input').value.trim();
-        if (nameInput) {
-            this.playerName = nameInput;
-            localStorage.setItem('tabu_player_name', this.playerName);
-        }
+        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
+        this.playerName = name;
+        localStorage.setItem('tabu_player_name', name);
 
         const code = Math.random().toString(36).substring(2, 7).toUpperCase();
         this.roomCode = code;
-
-        // Direkt URL değiştir + oda oluştur
-        window.location.href = `?room=${code}`;
-        // (Yukarıdaki satır sayfayı yeniler ve init() otomatik join yapacak)
+        window.location.href = `?room=${code}`;   // sayfayı yenile
     },
 
     manualJoin() {
         let code = document.getElementById('join-code-input').value.trim().toUpperCase();
-        if (code.length !== 5) {
-            alert("Lütfen 5 karakterlik geçerli bir oda kodu girin!");
-            return;
-        }
-        const nameInput = document.getElementById('login-name-input').value.trim();
-        if (nameInput) {
-            this.playerName = nameInput;
-            localStorage.setItem('tabu_player_name', this.playerName);
-        }
-        this.roomCode = code;
+        if (code.length !== 5) return alert("5 karakterlik oda kodu girin!");
+        const name = document.getElementById('login-name-input').value.trim() || "Oyuncu";
+        this.playerName = name;
+        localStorage.setItem('tabu_player_name', name);
         window.location.href = `?room=${code}`;
     },
 
     joinExistingRoom(code) {
         this.roomRef = this.db.ref('rooms/' + code);
 
-        // Listener'ı kur
-        this.roomRef.on('value', (snap) => {
-            if (snap.exists()) {
-                ENGINE.update(snap.val());
-            } else {
-                // Oda yoksa oluştur (ilk oyuncu için)
-                this.roomRef.set({
+        // İlk olarak oda yoksa oluştur
+        this.roomRef.once('value').then(snap => {
+            if (!snap.exists()) {
+                return this.roomRef.set({
                     status: 'lobby',
-                    players: {},
                     scoreRed: 0,
-                    scoreBlue: 0
-                }).then(() => {
-                    this.addPlayerToRoom();
-                }).catch(err => console.error("Oda oluşturma hatası:", err));
+                    scoreBlue: 0,
+                    players: {}
+                });
             }
+        }).then(() => {
+            // Oyuncuyu ekle
+            this.roomRef.child('players/' + this.myId).update({
+                name: this.playerName,
+                team: 'blue',
+                role: 'anlatici',
+                joinedAt: Date.now()
+            });
+        }).catch(err => {
+            console.error("Firebase hatası:", err);
+            alert("Firebase bağlantı hatası: " + err.message);
         });
 
-        // Oyuncuyu ekle (eğer oda varsa direkt ekle)
-        setTimeout(() => this.addPlayerToRoom(), 300);
-    },
-
-    addPlayerToRoom() {
-        if (!this.roomRef) return;
-        this.roomRef.child('players/' + this.myId).update({
-            name: this.playerName,
-            team: 'blue',
-            role: 'anlatici',
-            joinedAt: Date.now()
-        }).catch(err => console.error("Oyuncu ekleme hatası:", err));
+        // Değişiklikleri dinle
+        this.roomRef.on('value', snap => {
+            if (snap.exists()) {
+                ENGINE.update(snap.val());
+            }
+        });
     },
 
     joinRole(team, role) {
-        if (this.roomRef) {
-            this.roomRef.child('players/' + this.myId).update({ team, role });
-        }
+        if (this.roomRef) this.roomRef.child('players/' + this.myId).update({ team, role });
     },
 
     copyRoomCode() {
-        if (this.roomCode) {
-            navigator.clipboard.writeText(this.roomCode).then(() => {
-                alert(`✅ Oda kodu kopyalandı: ${this.roomCode}\nArkadaşına gönder!`);
-            });
-        }
+        if (this.roomCode) navigator.clipboard.writeText(this.roomCode).then(() => alert("Oda kodu kopyalandı: " + this.roomCode));
     }
 };
 
