@@ -1,22 +1,30 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; font-family: sans-serif; }
-#app { position: relative; width: 100vw; height: 100vh; max-width: 500px; background: #111; overflow: hidden; }
+body, html { width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; }
+#app { position: relative; width: 100vw; height: 100vh; max-width: 500px; overflow: hidden; }
 .screen { position: absolute; width: 100%; height: 100%; background-size: 100% 100%; display: none; }
 .active { display: block; }
 
-/* Görseller */
 #screen-login { background-image: url('bg-login.png'); }
 #screen-lobby { background-image: url('bg-lobby.jpg'); }
-.narrator-a { background-image: url('bg-narrator-a.png'); }
-.listener-a { background-image: url('bg-listener-a.png'); }
-.narrator-b { background-image: url('bg-narrator-b.png'); }
-.listener-b { background-image: url('bg-listener-b.png'); }
+.narrator-blue { background-image: url('bg-narrator-a.png'); }
+.narrator-red { background-image: url('bg-narrator-b.png'); }
+.listener-blue { background-image: url('bg-listener-a.png'); }
+.listener-red { background-image: url('bg-listener-b.png'); }
 
-#login-name-input { position: absolute; top: 62%; left: 13%; width: 74%; height: 15%; background: transparent; border: none; color: white; text-align: center; font-size: 1.5rem; outline: none; }
-.hitbox { position: absolute; cursor: pointer; background: rgba(0,0,0,0); }
-#btn-create-room { top: 86%; left: 26%; width: 48%; height: 7%; }
-#btn-start-game { bottom: 8%; left: 35%; width: 30%; height: 8%; }
+/* Görseldeki Beyaz Kutuların Üstündeki Görünmez Butonlar */
+#login-name-input { position: absolute; top: 72%; left: 12%; width: 76%; height: 7%; background: white; border: none; text-align: center; font-size: 1.5rem; border-radius: 10px; }
+#btn-create-room { position: absolute; top: 85%; left: 28%; width: 44%; height: 8%; cursor: pointer; }
 
-#word-main { position: absolute; top: 32%; width: 100%; text-align: center; color: white; font-size: 2.5rem; font-weight: bold; }
-#word-forbidden { position: absolute; top: 55%; width: 100%; text-align: center; color: #ddd; font-size: 1.4rem; line-height: 1.8; }
-#flash-overlay { position: absolute; width: 100%; height: 100%; display: none; z-index: 100; pointer-events: none; }
+/* Lobi Takım Seçme (Beyaz Kutular) */
+.team-red-box { position: absolute; top: 28%; left: 8%; width: 40%; height: 40%; cursor: pointer; }
+.team-blue-box { position: absolute; top: 28%; left: 52%; width: 40%; height: 40%; cursor: pointer; }
+#btn-start-game { position: absolute; bottom: 8%; left: 35%; width: 30%; height: 8%; cursor: pointer; }
+
+/* Oyun Ekranı Butonları */
+#word-main { position: absolute; top: 25%; width: 100%; text-align: center; font-size: 2.5rem; font-weight: bold; color: #333; }
+#word-forbidden { position: absolute; top: 45%; width: 100%; text-align: center; font-size: 1.4rem; color: #555; line-height: 2; }
+#btn-tabu { position: absolute; bottom: 5%; left: 5%; width: 28%; height: 12%; cursor: pointer; }
+#btn-pass { position: absolute; bottom: 5%; left: 36%; width: 28%; height: 12%; cursor: pointer; }
+#btn-correct { position: absolute; bottom: 5%; left: 67%; width: 28%; height: 12%; cursor: pointer; }
+
+#flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 1000; }

@@ -1,48 +1,65 @@
 const ENGINE = {
     roomData: null,
     words: [
-        { main: "ELMA", forbidden: ["Meyve", "Kırmızı", "Amasya", "Ağaç", "Isırmak"] },
-        { main: "GÜNEŞ", forbidden: ["Sarı", "Sıcak", "Yıldız", "Gündüz", "Parlak"] }
+        { m: "KORSAN", f: ["Gemi", "Deniz", "Kanca", "Hazine", "Papağan"] },
+        { m: "TELEFON", f: ["Arama", "Ekran", "Mesaj", "Akıllı", "Tuş"] },
+        { m: "İSTANBUL", f: ["Boğaz", "Deniz", "Şehir", "Kalabalık", "Metropol"] }
     ],
     update(data) {
         this.roomData = data;
         const me = data.players?.[NET.myId];
         if (data.status === 'playing') {
-            document.getElementById('screen-lobby').classList.remove('active');
-            document.getElementById('screen-game').classList.add('active');
-            this.renderGame(me);
+            this.renderGame(me, data);
+        } else {
+            this.renderLobby(data);
         }
-        document.getElementById('score-display').textContent = `A: ${data.scoreA || 0} | B: ${data.scoreB || 0}`;
     },
-    renderGame(me) {
+    renderLobby(data) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-lobby').classList.add('active');
+    },
+    renderGame(me, data) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const screen = document.getElementById('screen-game');
-        const isAnlatici = me?.role === 'anlatici';
-        screen.className = `screen active ${me?.role}-${me?.team === 'blue' ? 'a' : 'b'}`;
-        
-        document.getElementById('narrator-controls').style.display = isAnlatici ? 'block' : 'none';
-        document.getElementById('guess-area').style.display = isAnlatici ? 'none' : 'block';
-        
-        if (isAnlatici && this.roomData.currentWord) {
-            document.getElementById('word-main').textContent = this.roomData.currentWord.main;
-            document.getElementById('word-forbidden').innerHTML = this.roomData.currentWord.forbidden.join('<br>');
+        screen.classList.add('active');
+        const role = me.role === 'anlatici' ? 'narrator' : 'listener';
+        const team = me.team === 'blue' ? 'blue' : 'red';
+        screen.className = `screen active ${role}-${team}`;
+        document.getElementById('narrator-controls').style.display = me.role === 'anlatici' ? 'block' : 'none';
+        if (me.role === 'anlatici') {
+            document.getElementById('word-main').textContent = data.currentWord.m;
+            document.getElementById('word-forbidden').innerHTML = data.currentWord.f.join('<br>');
         } else {
             document.getElementById('word-main').textContent = "???";
-            document.getElementById('word-forbidden').textContent = "Arkadaşını Dinle!";
+            document.getElementById('word-forbidden').textContent = "ARKADAŞINI DİNLE!";
         }
     },
     startGame() {
         NET.roomRef.update({
             status: 'playing',
-            scoreA: 0, scoreB: 0,
-            currentWord: this.words[Math.floor(Math.random() * this.words.length)]
+            currentWord: this.words[Math.floor(Math.random() * this.words.length)],
+            scoreRed: 0, scoreBlue: 0
         });
     },
     reportCorrect() {
-        const key = this.roomData.currentTurn === 'blue' ? 'scoreA' : 'scoreB';
+        const key = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
         NET.roomRef.child(key).set((this.roomData[key] || 0) + 1);
         this.nextWord();
+        this.flash('rgba(0,255,0,0.5)');
+    },
+    reportTabu() {
+        const key = this.roomData.players[NET.myId].team === 'blue' ? 'scoreBlue' : 'scoreRed';
+        NET.roomRef.child(key).set((this.roomData[key] || 0) - 1);
+        this.nextWord();
+        this.flash('rgba(255,0,0,0.5)');
     },
     nextWord() {
-        NET.roomRef.update({ currentWord: this.words[Math.floor(Math.random() * this.words.length)] });
+        const word = this.words[Math.floor(Math.random() * this.words.length)];
+        NET.roomRef.update({ currentWord: word });
+    },
+    flash(color) {
+        const f = document.getElementById('flash-overlay');
+        f.style.background = color; f.style.display = 'block';
+        setTimeout(() => f.style.display = 'none', 200);
     }
 };
