@@ -20,7 +20,7 @@ const NET = {
         const params = new URLSearchParams(window.location.search);
         this.roomCode = params.get('room');
         if (this.roomCode) {
-            this.joinExistingRoom(this.roomCode);
+            this.joinRoom(this.roomCode);
         }
     },
 
@@ -30,8 +30,7 @@ const NET = {
         localStorage.setItem('tabu_player_name', name);
 
         const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-        this.roomCode = code;
-        window.location.href = `?room=${code}`;   // sayfayı yenile
+        window.location.href = `?room=${code}`;
     },
 
     manualJoin() {
@@ -43,11 +42,11 @@ const NET = {
         window.location.href = `?room=${code}`;
     },
 
-    joinExistingRoom(code) {
+    joinRoom(code) {
         this.roomRef = this.db.ref('rooms/' + code);
 
-        // İlk olarak oda yoksa oluştur
-        this.roomRef.once('value').then(snap => {
+        // Oda yoksa oluştur
+        this.roomRef.once('value').then((snap) => {
             if (!snap.exists()) {
                 return this.roomRef.set({
                     status: 'lobby',
@@ -58,21 +57,23 @@ const NET = {
             }
         }).then(() => {
             // Oyuncuyu ekle
-            this.roomRef.child('players/' + this.myId).update({
+            return this.roomRef.child('players/' + this.myId).update({
                 name: this.playerName,
                 team: 'blue',
                 role: 'anlatici',
                 joinedAt: Date.now()
             });
-        }).catch(err => {
-            console.error("Firebase hatası:", err);
-            alert("Firebase bağlantı hatası: " + err.message);
+        }).catch((err) => {
+            console.error("Firebase Error:", err);
+            alert("Bağlantı hatası: " + err.message);
         });
 
-        // Değişiklikleri dinle
-        this.roomRef.on('value', snap => {
+        // Gerçek zamanlı dinle
+        this.roomRef.on('value', (snap) => {
             if (snap.exists()) {
                 ENGINE.update(snap.val());
+            } else {
+                console.log("Oda verisi yok");
             }
         });
     },
@@ -82,7 +83,9 @@ const NET = {
     },
 
     copyRoomCode() {
-        if (this.roomCode) navigator.clipboard.writeText(this.roomCode).then(() => alert("Oda kodu kopyalandı: " + this.roomCode));
+        if (this.roomCode) {
+            navigator.clipboard.writeText(this.roomCode).then(() => alert("Kodu kopyaladım: " + this.roomCode));
+        }
     }
 };
 
